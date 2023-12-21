@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +19,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class AuthFilter extends OncePerRequestFilter {
+public class AuthWithUserDetailsServiceFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
@@ -38,7 +37,6 @@ public class AuthFilter extends OncePerRequestFilter {
             password= userNameAndPassword[1];
         }
 
-
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
             if (passwordEncoder.matches(password, userDetails.getPassword())) {
@@ -47,7 +45,7 @@ public class AuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken); 
             } 
         } 
-        filterChain.doFilter(request, response); 
+        filterChain.doFilter(request, response);
     }
 
     private  String[] decode(final String encoded) {
